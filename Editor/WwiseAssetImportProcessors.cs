@@ -133,12 +133,18 @@ namespace AK.Wwise.Unity.WwiseAddressables
 			AddressableAssetGroup group = settings.groups.Find(x => x.Name == groupName);
 			if (group == null)
 			{
-				group = settings.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema> { settings.DefaultGroup.Schemas[0] }, typeof(BundledAssetGroupSchema));
+				group = settings.CreateGroup(groupName, false, false, false, new List<AddressableAssetGroupSchema> { settings.DefaultGroup.Schemas[0] }, typeof(BundledAssetGroupSchema), typeof(ContentUpdateGroupSchema));
 				var bundleSchema = group.GetSchema<BundledAssetGroupSchema>();
 				if (bundleSchema != null)
 				{
 					bundleSchema.Compression = BundledAssetGroupSchema.BundleCompressionMode.Uncompressed;
+					bundleSchema.BuildPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteBuildPath);
+					bundleSchema.LoadPath.SetVariableByName(settings, AddressableAssetSettings.kRemoteLoadPath);
+					bundleSchema.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackSeparately;
 				}
+
+				var contentUpdateSchema = group.GetSchema<ContentUpdateGroupSchema>();
+				contentUpdateSchema.StaticContent = false;
 			}
 
 			return group;
@@ -444,13 +450,15 @@ namespace AK.Wwise.Unity.WwiseAddressables
 				var groupEntry = settings.CreateOrMoveEntry(guid, group);
 				if (groupEntry != null)
 				{
-					if (assetMetadata.labels.Count >0)
+					/*if (assetMetadata.labels.Count >0)
 					{
 						foreach (string label in assetMetadata.labels)
 						{
 							groupEntry.labels.Add(label);
 						}
-					}
+					}*/
+					groupEntry.labels.Add("Remote_Assets");
+					groupEntry.labels.Add("Remote_Sounds");
 					groupEntriesModified.Add(groupEntry);
 				}
 			}

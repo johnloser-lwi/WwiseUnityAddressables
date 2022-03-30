@@ -13,8 +13,14 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace AK.Wwise.Unity.WwiseAddressables
 {
+	
+	public delegate void OnBankLoadedCallback(WwiseAddressableSoundBank bank);
+	
 	public class AkAddressableBankManager
 	{
+		public static readonly string SOUND_CACHE_PATH = Path.Combine(UnityEngine.Application.persistentDataPath, "Cache/Audio");
+		
+		public OnBankLoadedCallback OnBankLoadedSuccessfully = bank => { };
 
 		private ConcurrentDictionary<string, WwiseAddressableSoundBank> m_AddressableBanks =
 			new ConcurrentDictionary<string, WwiseAddressableSoundBank>();
@@ -258,11 +264,11 @@ namespace AK.Wwise.Unity.WwiseAddressables
 					{
 						if (language == "SFX")
 						{
-							destinationDir = UnityEngine.Application.persistentDataPath; ;
+							destinationDir = SOUND_CACHE_PATH; ;
 						}
 						else
 						{
-							destinationDir = Path.Combine(UnityEngine.Application.persistentDataPath, language);
+							destinationDir = Path.Combine(SOUND_CACHE_PATH, language);
 						}
 
 						if (!Directory.Exists(destinationDir))
@@ -385,10 +391,12 @@ namespace AK.Wwise.Unity.WwiseAddressables
 
 		private void OnBankLoaded(WwiseAddressableSoundBank bank)
 		{
+			
 			if (bank.loadState == BankLoadState.Loaded)
 			{
+				if (bank.name != InitBank.name) OnBankLoadedSuccessfully(bank);
 				UnityEngine.Debug.Log($"Wwise Addressable Bank Manager : Loaded {bank.name} bank -  Bank ID : {bank.soundbankId}");
-
+				
 				if (InitBankLoaded && bank.name == InitBank.name)
 				{
 					foreach (var b in m_AddressableBanks.Values)

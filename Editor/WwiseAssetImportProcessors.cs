@@ -303,7 +303,7 @@ namespace AK.Wwise.Unity.WwiseAddressables
 
 					var soundbankInfos = AkAddressablesEditorUtilities.ParsePlatformSoundbanksXML(platform, name);
 
-					if (!soundbankInfos.eventToSoundBankMap.ContainsKey(name) && name.Contains("ExternalSources")) continue;
+					if (!soundbankInfos.eventToSoundBankMap.ContainsKey(name) && assetPath.Contains("ExternalSources")) continue;
 
 					var bankNames = soundbankInfos.eventToSoundBankMap[name];
 					foreach (var bankName in bankNames)
